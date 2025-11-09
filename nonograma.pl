@@ -79,25 +79,7 @@ colocarXs(N, [C|Cs], R) :-
 
 
 % Ejercicio 5
-<<<<<<< HEAD
-% % resolverNaive(+NN)
-% resolverNaive(Filas, Columnas, Grilla) :-
-%     length(Filas, NF),
-%     length(Columnas, NC),
-%     matriz(NF, NC, Grilla),
-%     asociar(Filas, Grilla),
-%     transponer(Grilla, Cols),
-%     asociar(Columnas, Cols),
-%     maplist(pintadasValidas, Filas),
-%     maplist(pintadasValidas, Columnas).
- 
-% asociar([], []).
-% asociar([r(_, C)|Rs], [C|Ls]) :-
-%     asociar(Rs, Ls).
-
-=======
-% resolverNaive(+NN)
->>>>>>> 96568875aedf48ac51856e0d324f3a8a065d3cc9
+% resolverNaive(+NN) 
 resolverNaive(nono(_M,Res)) :-  
         maplist(pintadasValidas, Res).
 
@@ -146,6 +128,7 @@ deducirVariasPasadasCont(_, A, A). % Si VI = VF entonces no hubo más cambios y 
 deducirVariasPasadasCont(NN, A, B) :- A =\= B, deducirVariasPasadas(NN).
 
 % Ejercicio 8
+% Ejercicio 8
 %nono(Matriz, Restricciones)
 
 restriccionConMenosLibres(NN, R) :-
@@ -163,9 +146,8 @@ restriccionConMenosLibres(NN, R) :-
           N2 > 0,
           N2 < N )).
 
-
 % Ejercicio 9
-resolverDeduciendo(NN) :- completar("Ejercicio 9").
+resolverDeduciendo(_) :- completar("Ejercicio 9").
 
 % Ejercicio 10
 solucionUnica(nono(M, Res)) :- 
