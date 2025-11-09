@@ -93,20 +93,9 @@ colocarXs(N, [C|Cs], R) :-
 
 % Ejercicio 5
 % resolverNaive(+NN)
-resolverNaive(Filas, Columnas, Grilla) :-
-    length(Filas, NF),
-    length(Columnas, NC),
-    matriz(NF, NC, Grilla),
-    asociar(Filas, Grilla),
-    transponer(Grilla, Cols),
-    asociar(Columnas, Cols),
-    maplist(pintadasValidas, Filas),
-    maplist(pintadasValidas, Columnas).
- 
-asociar([], []).
-asociar([r(_, C)|Rs], [C|Ls]) :-
-    asociar(Rs, Ls).
-
+resolverNaive(nono(_M,Res)) :-  
+        maplist(pintadasValidas, Res).
+    
 % Ejercicio 6
 pintarObligatorias(r(Res, Celdas)):-
     length(Celdas, N),
