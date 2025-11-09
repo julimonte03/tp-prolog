@@ -21,10 +21,21 @@ fila(N, [_|R]) :-
 
 
 % Ejercicio 2
-replicar(X, N, L) :- completar("Ejercicio 2").
-
+%replicar(+Elem, +N, -Lista)
+replicar(_, 0, []).
+replicar(X, N, [X|XS]) :- replicar(X, M, XS), N is M+1.
+ 
 % Ejercicio 3
-transponer(_, _) :- completar("Ejercicio 3").
+% transponer(+M, -MT)
+transponer([], []). 
+transponer([[]|_], []) :- !.
+transponer(M, [C|MT]) :- cabezasYColas(M,C,Resto), transponer(Resto, MT).
+ 
+% cabezasYColas(+Fila,-Primeros,-Colas)
+cabezasYColas([],[],[]).
+cabezasYColas([[X|XS]|YS], [X|ZS], [XS|TS]):-
+	cabezasYColas(YS, ZS, TS).
+ 
 
 % Predicado dado armarNono/3
 armarNono(RF, RC, nono(M, RS)) :-
@@ -40,10 +51,61 @@ zipR([], [], []).
 zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 
 % Ejercicio 4
-pintadasValidas(_) :- completar("Ejercicio 4").
+% pintadasValidas(+R)
+% R = r(Res, Celdas)
+% Caso base: sin bloques => todo 'o'
+pintadasValidas(r([], Celdas)) :-
+    length(Celdas, N),
+    replicar(o, N, Celdas).
+ 
+pintadasValidas(r([B|Bs], Celdas)) :-
+    length(Celdas, N),
+    sum_list(Bs, SumR),              
+    length(Bs, K),
+    SepR is max(0, K - 1),           
+    MaxAntes is N - (B + SepR + SumR),
+    MaxAntes >= 0,
+    between(0, MaxAntes, OsAntes),   
+    colocarOs(OsAntes, Celdas, R1),  
+    colocarXs(B, R1, R2),            
+    poner_sep(K, R2, R3),            
+    pintadasValidas(r(Bs, R3)).
+ 
+poner_sep(0, L, L).
+poner_sep(K, LIn, LOut) :-
+    K > 0,
+    colocarOs(1, LIn, LOut).
+ 
+colocarOs(0, L, L).
+colocarOs(N, [C|Cs], R) :-
+    N > 0,
+    C = o,
+    N1 is N - 1,
+    colocarOs(N1, Cs, R).
+ 
+colocarXs(0, L, L).
+colocarXs(N, [C|Cs], R) :-
+    N > 0,
+    C = x,
+    N1 is N - 1,
+    colocarXs(N1, Cs, R).
+
 
 % Ejercicio 5
-resolverNaive(_) :-  completar("Ejercicio 5").
+% resolverNaive(+NN)
+resolverNaive(Filas, Columnas, Grilla) :-
+    length(Filas, NF),
+    length(Columnas, NC),
+    matriz(NF, NC, Grilla),
+    asociar(Filas, Grilla),
+    transponer(Grilla, Cols),
+    asociar(Columnas, Cols),
+    maplist(pintadasValidas, Filas),
+    maplist(pintadasValidas, Columnas).
+ 
+asociar([], []).
+asociar([r(_, C)|Rs], [C|Ls]) :-
+    asociar(Rs, Ls).
 
 % Ejercicio 6
 pintarObligatorias(_) :- completar("Ejercicio 6").
@@ -56,7 +118,10 @@ combinarCelda(A, B, A) :- nonvar(A), nonvar(B), A = B.
 combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
 
 % Ejercicio 7
-deducir1Pasada(_) :- completar("Ejercicio 7").
+% deducir1Pasada(+NN)
+deducir1Pasada(nono(Filas,Columnas)) :-
+maplist(pintarObligatorias, Filas),
+maplist(pintarObligatorias, Columnas).
 
 % Predicado dado
 cantidadVariablesLibres(T, N) :- term_variables(T, LV), length(LV, N).
