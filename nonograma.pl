@@ -1,25 +1,13 @@
 
 
 % Ejercicio 1
-% matriz(+Filas, +Columnas, -Matriz)
+% matriz(+F, +C,-M)
 matriz(0, _, []).
-%caso recursivo -> Si tengo que construir una matriz de F filas y C columnas: genero una fila (Fila) de longitud C con fila(C, Fila). Repetimos para las F-1 filas restantes
-matriz(F, C, [Fila|Resto]) :-
-    F > 0,
-    F1 is F - 1,
-    fila(C, Fila),
-    matriz(F1, C, Resto).
-
-% el resutlado es la matriz [Fila|Resto]
-
-% fila(+N, -Lista)
-fila(0, []).
-fila(N, [_|R]) :-
-    N > 0,
-    N1 is N - 1,
-    fila(N1, R).
-
-
+matriz(F, C, [N|XS]) :- columna(C,N), matriz(G,C,XS), F is G+1.
+% columna(+C,-M)
+columna(0,[]).
+columna(C,[_|XS]):- columna(N, XS), C is N+1.
+ 
 % Ejercicio 2
 %replicar(+Elem, +N, -Lista)
 replicar(_, 0, []).
@@ -35,7 +23,6 @@ transponer(M, [C|MT]) :- cabezasYColas(M,C,Resto), transponer(Resto, MT).
 cabezasYColas([],[],[]).
 cabezasYColas([[X|XS]|YS], [X|ZS], [XS|TS]):-
 	cabezasYColas(YS, ZS, TS).
- 
 
 % Predicado dado armarNono/3
 armarNono(RF, RC, nono(M, RS)) :-
@@ -92,6 +79,7 @@ colocarXs(N, [C|Cs], R) :-
 
 
 % Ejercicio 5
+<<<<<<< HEAD
 % % resolverNaive(+NN)
 % resolverNaive(Filas, Columnas, Grilla) :-
 %     length(Filas, NF),
@@ -107,11 +95,27 @@ colocarXs(N, [C|Cs], R) :-
 % asociar([r(_, C)|Rs], [C|Ls]) :-
 %     asociar(Rs, Ls).
 
+=======
+% resolverNaive(+NN)
+>>>>>>> 96568875aedf48ac51856e0d324f3a8a065d3cc9
 resolverNaive(nono(_M,Res)) :-  
         maplist(pintadasValidas, Res).
 
 % Ejercicio 6
-pintarObligatorias(_) :- completar("Ejercicio 6").
+pintarObligatorias(r(Res, Celdas)):-
+    length(Celdas, N),
+    findall(L, (length(L, N) , pintadasValidas(r(Res, L))), Soluciones),
+    combinarSoluciones(Soluciones, Celdas).
+
+combinarSoluciones([Ultima], Ultima).
+combinarSoluciones([S1, S2| Resto], Resultado):-
+    combinarListas(S1, S2, Combinado),
+    combinarSoluciones([Combinado | Resto], Resultado).
+
+combinarListas([], [], []).
+combinarListas([H1|T1], [H2|T2], [HResultado | TResultado]):-
+    combinarCelda(H1, H2, HResultado),
+    combinarListas(T1, T2, TResultado).
 
 % Predicado dado combinarCelda/3
 combinarCelda(A, B, _) :- var(A), var(B).
@@ -164,8 +168,11 @@ restriccionConMenosLibres(NN, R) :-
 resolverDeduciendo(NN) :- completar("Ejercicio 9").
 
 % Ejercicio 10
-solucionUnica(NN) :- completar("Ejercicio 10").
-
+solucionUnica(nono(M, Res)) :- 
+    findall(M, resolverNaive(nono(M,Res)), Soluciones),
+    length(Soluciones, N),
+    N =:= 1.
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                              %
 %    Ejemplos de nonogramas    %

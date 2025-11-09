@@ -1,4 +1,4 @@
-
+:- use_module(library(plunit)).
 :- begin_tests(nonograma).
 :- ensure_loaded(nonograma).
 
