@@ -108,14 +108,20 @@ asociar([r(_, C)|Rs], [C|Ls]) :-
     asociar(Rs, Ls).
 
 % Ejercicio 6
-pintarObligatorias(_) :- completar("Ejercicio 6").
+pintarObligatorias(r(Res, Celdas)):-
+    length(Celdas, N),
+    findall(L, (length(L, N) , pintadasValidas(r(Res, L))), Soluciones),
+    combinarSoluciones(Soluciones, Celdas).
 
-% Predicado dado combinarCelda/3
-combinarCelda(A, B, _) :- var(A), var(B).
-combinarCelda(A, B, _) :- nonvar(A), var(B).
-combinarCelda(A, B, _) :- var(A), nonvar(B).
-combinarCelda(A, B, A) :- nonvar(A), nonvar(B), A = B.
-combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
+combinarSoluciones([Ultima], Ultima).
+combinarSoluciones([S1, S2| Resto], Resultado):-
+    combinarListas(S1, S2, Combinado),
+    combinarSoluciones([Combinado | Resto], Resultado).
+
+combinarListas([], [], []).
+combinarListas([H1|T1], [H2|T2], [HResultado | TResultado]):-
+    combinarCelda(H1, H2, HResultado),
+    combinarListas(T1, T2, TResultado).
 
 % Ejercicio 7
 % deducir1Pasada(+NN)
@@ -145,8 +151,11 @@ restriccionConMenosLibres(_, _) :- completar("Ejercicio 8").
 resolverDeduciendo(NN) :- completar("Ejercicio 9").
 
 % Ejercicio 10
-solucionUnica(NN) :- completar("Ejercicio 10").
-
+solucionUnica(nono(M, Res)) :- 
+    findall(M, resolverNaive(nono(M,Res)), Soluciones),
+    length(Soluciones, N),
+    N =:= 1.
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                              %
 %    Ejemplos de nonogramas    %
