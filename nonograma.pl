@@ -92,20 +92,23 @@ colocarXs(N, [C|Cs], R) :-
 
 
 % Ejercicio 5
-% resolverNaive(+NN)
-resolverNaive(Filas, Columnas, Grilla) :-
-    length(Filas, NF),
-    length(Columnas, NC),
-    matriz(NF, NC, Grilla),
-    asociar(Filas, Grilla),
-    transponer(Grilla, Cols),
-    asociar(Columnas, Cols),
-    maplist(pintadasValidas, Filas),
-    maplist(pintadasValidas, Columnas).
+% % resolverNaive(+NN)
+% resolverNaive(Filas, Columnas, Grilla) :-
+%     length(Filas, NF),
+%     length(Columnas, NC),
+%     matriz(NF, NC, Grilla),
+%     asociar(Filas, Grilla),
+%     transponer(Grilla, Cols),
+%     asociar(Columnas, Cols),
+%     maplist(pintadasValidas, Filas),
+%     maplist(pintadasValidas, Columnas).
  
-asociar([], []).
-asociar([r(_, C)|Rs], [C|Ls]) :-
-    asociar(Rs, Ls).
+% asociar([], []).
+% asociar([r(_, C)|Rs], [C|Ls]) :-
+%     asociar(Rs, Ls).
+
+resolverNaive(nono(_M,Res)) :-  
+        maplist(pintadasValidas, Res).
 
 % Ejercicio 6
 pintarObligatorias(_) :- completar("Ejercicio 6").
@@ -139,7 +142,23 @@ deducirVariasPasadasCont(_, A, A). % Si VI = VF entonces no hubo más cambios y 
 deducirVariasPasadasCont(NN, A, B) :- A =\= B, deducirVariasPasadas(NN).
 
 % Ejercicio 8
-restriccionConMenosLibres(_, _) :- completar("Ejercicio 8").
+%nono(Matriz, Restricciones)
+
+restriccionConMenosLibres(NN, R) :-
+	NN = nono(_, RS), %r(Bloques, Celdas)
+    member(R, RS), % agarramos una restricción candidata R
+    R = r(_, L),        % agarro su lista de celdas L
+    cantidadVariablesLibres(L, N),
+    N > 0,
+	%ya teneemos las vars libres de R, y ahora 
+	%vemos que no existe OTRA restriccion en RS tal tenga menos celdas sin decidir
+    not(( member(OTRA, RS),
+          OTRA \== R,
+          OTRA = r(_, L2),
+          cantidadVariablesLibres(L2, N2),
+          N2 > 0,
+          N2 < N )).
+
 
 % Ejercicio 9
 resolverDeduciendo(NN) :- completar("Ejercicio 9").
