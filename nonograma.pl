@@ -123,6 +123,13 @@ combinarListas([H1|T1], [H2|T2], [HResultado | TResultado]):-
     combinarCelda(H1, H2, HResultado),
     combinarListas(T1, T2, TResultado).
 
+% Predicado dado combinarCelda/3
+combinarCelda(A, B, _) :- var(A), var(B).
+combinarCelda(A, B, _) :- nonvar(A), var(B).
+combinarCelda(A, B, _) :- var(A), nonvar(B).
+combinarCelda(A, B, A) :- nonvar(A), nonvar(B), A = B.
+combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
+
 % Ejercicio 7
 % deducir1Pasada(+NN)
 deducir1Pasada(nono(Filas,Columnas)) :-
