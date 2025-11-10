@@ -147,7 +147,17 @@ restriccionConMenosLibres(NN, R) :-
           N2 < N )).
 
 % Ejercicio 9
-resolverDeduciendo(_) :- completar("Ejercicio 9").
+resolverDeduciendo(NN) :-
+    deducirVariasPasadas(NN), 
+    cantidadVariablesLibres(NN, 0),
+    !.
+
+resolverDeduciendo(NN):-
+    deducirVariasPasadas(NN),
+    restriccionConMenosLibres(NN, R),     % R = Restriccion con menos celdas no instanciadas
+    pintadasValidas(R),
+    resolverDeduciendo(NN).
+
 
 % Ejercicio 10
 solucionUnica(nono(M, Res)) :- 
