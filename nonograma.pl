@@ -154,7 +154,7 @@ resolverDeduciendo(NN) :-
 
 resolverDeduciendo(NN):-
     deducirVariasPasadas(NN),
-    restriccionConMenosLibres(NN, R),     % R = Restriccion con menos celdas no instanciadas
+    restriccionConMenosLibres(NN, R),
     pintadasValidas(R),
     resolverDeduciendo(NN).
 
