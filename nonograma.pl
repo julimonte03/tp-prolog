@@ -1,23 +1,27 @@
-
-
 % Ejercicio 1
 % matriz(+F, +C,-M)
-matriz(0, _, []).
+
+matriz(0, _, []). 
+ % generamos una fila de C elementos y despues el resto de la matriz
 matriz(F, C, [N|XS]) :- columna(C,N), matriz(G,C,XS), F is G+1.
-% columna(+C,-M)
+
+% columna(+C,-M) auxiliar
 columna(0,[]).
 columna(C,[_|XS]):- columna(N, XS), C is N+1.
  
 % Ejercicio 2
 %replicar(+Elem, +N, -Lista)
+
+% replicar(a,3,L) -> L = [a,a,a]
 replicar(_, 0, []).
-replicar(X, N, [X|XS]) :- replicar(X, M, XS), N is M+1.
+replicar(X, N, [X|XS]) :- replicar(X, M, XS), N is M+1. 
  
 % Ejercicio 3
 % transponer(+M, -MT)
 transponer([], []). 
-transponer([[]|_], []) :- !.
-transponer(M, [C|MT]) :- cabezasYColas(M,C,Resto), transponer(Resto, MT).
+transponer([[]|_], []) :- !. % si ya no hay más columnas
+% saca las cabezas de cada fila y sigue con las colas
+transponer(M, [C|MT]) :- cabezasYColas(M,C,Resto), transponer(Resto, MT). 
  
 % cabezasYColas(+Fila,-Primeros,-Colas)
 cabezasYColas([],[],[]).
@@ -41,35 +45,41 @@ zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
 % pintadasValidas(+R)
 % R = r(Res, Celdas)
 % Caso base: sin bloques => todo 'o'
+
 pintadasValidas(r([], Celdas)) :-
     length(Celdas, N),
     replicar(o, N, Celdas).
- 
+% caso rec
 pintadasValidas(r([B|Bs], Celdas)) :-
     length(Celdas, N),
-    sum_list(Bs, SumR),              
+    sum_list(Bs, SumR),   % espacio libre antes del primer bloque            
     length(Bs, K),
     SepR is max(0, K - 1),           
     MaxAntes is N - (B + SepR + SumR),
     MaxAntes >= 0,
-    between(0, MaxAntes, OsAntes),   
+    between(0, MaxAntes, OsAntes),     % probamos con distintas cantidades de 'o'
     colocarOs(OsAntes, Celdas, R1),  
     colocarXs(B, R1, R2),            
     poner_sep(K, R2, R3),            
     pintadasValidas(r(Bs, R3)).
- 
+
+% poner_sep(+K, +LIn, -LOut) 
 poner_sep(0, L, L).
 poner_sep(K, LIn, LOut) :-
     K > 0,
     colocarOs(1, LIn, LOut).
- 
+
+
+% colocarOs(+N, +L, -R)
+% pone N 'o's al principio de la lista
 colocarOs(0, L, L).
 colocarOs(N, [C|Cs], R) :-
     N > 0,
     C = o,
     N1 is N - 1,
     colocarOs(N1, Cs, R).
- 
+% colocarXs(+N, +L, -R)
+% pone N 'x' al principio (el bloque pintado)
 colocarXs(0, L, L).
 colocarXs(N, [C|Cs], R) :-
     N > 0,
@@ -84,15 +94,16 @@ resolverNaive(nono(_M,Res)) :-
         maplist(pintadasValidas, Res).
 
 % Ejercicio 6
+% pintarObligatorias(+R)
 pintarObligatorias(r(Res, Celdas)):-
     length(Celdas, N),
     findall(L, (length(L, N) , pintadasValidas(r(Res, L))), Soluciones),
     combinarSoluciones(Soluciones, Celdas).
-
-combinarSoluciones([Ultima], Ultima).
+% si una celda es igual en todas, se mantiene si no, queda libre
+combinarSoluciones([Ult], Ult).
 combinarSoluciones([S1, S2| Resto], Resultado):-
-    combinarListas(S1, S2, Combinado),
-    combinarSoluciones([Combinado | Resto], Resultado).
+    combinarListas(S1, S2, Combi),
+    combinarSoluciones([Combi | Resto], Resultado).
 
 combinarListas([], [], []).
 combinarListas([H1|T1], [H2|T2], [HResultado | TResultado]):-
@@ -128,18 +139,17 @@ deducirVariasPasadasCont(_, A, A). % Si VI = VF entonces no hubo más cambios y 
 deducirVariasPasadasCont(NN, A, B) :- A =\= B, deducirVariasPasadas(NN).
 
 % Ejercicio 8
-% Ejercicio 8
-%nono(Matriz, Restricciones)
+ %nono(Matriz, Restricciones)
 
 restriccionConMenosLibres(NN, R) :-
-	NN = nono(_, RS), %r(Bloques, Celdas)
-    member(R, RS), % agarramos una restricción candidata R
+	NN = nono(_, Res), %r(Bloques, Celdas)
+    member(R, Res), % agarramos una restricción candidata R
     R = r(_, L),        % agarro su lista de celdas L
     cantidadVariablesLibres(L, N),
     N > 0,
 	%ya teneemos las vars libres de R, y ahora 
-	%vemos que no existe OTRA restriccion en RS tal tenga menos celdas sin decidir
-    not(( member(OTRA, RS),
+	%vemos que no existe OTRA restriccion en Res tal tenga menos celdas sin decidir
+    not(( member(OTRA, Res),
           OTRA \== R,
           OTRA = r(_, L2),
           cantidadVariablesLibres(L2, N2),
@@ -164,7 +174,68 @@ solucionUnica(nono(M, Res)) :-
     findall(M, resolverNaive(nono(M,Res)), Soluciones),
     length(Soluciones, N),
     N =:= 1.
-	
+
+% Ejercicio 11 – 
+ 
+tam(N, (F, C)) :-
+	% generamos la matriz M del nonograma N
+    nn(N, nono(M, _)),     
+	% contamos las filas
+    length(M, F),          
+    M = [PrimeraFila|_],   % agarramos la primera fila y contamos sus columnas
+	length(PrimeraFila, C).
+ 
+ 
+% Consultas:
+%   Para obtener el tamaño de cada nonograma -> ?- tam(N, T).
+%   Para verificar si tiene una única solución -> ?- nn(N, NN), solucionUnica(NN).
+%   Para verificar si se puede deducir sin backtracking -> ?- nn(N, NN), resolverDeduciendo(NN).
+
+% Resultados
+
+% N | Tamaño | ¿Solución única? | ¿Deducible sin backtracking? 
+
+% 0 | 2×3    
+% 1 | 5×5    
+% 2 | 5×5    
+% 3 | 10×10  
+% 4 | 5×5    
+% 5 | 5×5    
+% 6 | 5×5    
+% 7 | 10×10  
+% 8 | 10×10  
+% 9 | 5×5    
+% 10| 5×5    
+% 11| 10×10  
+% 12| 15×15  
+% 13| 11×5   
+% 14| 4×4    
+ 
+%Comentarios: La consulta de tamanio anda bien pero las otras no. El 9 se cuelga y el 10 no se cuelga, pero no devuelve false. cuando debería 
+%o sea, muestra algun nono siempre.
+% Lamentablemente no llegamos a encontrar errores a tiempo para hacer las consultas  “solución única” y “deducible sin backtracking” 
+
+%Ejercicio 12: Reversibilidad
+% Queremos ver replicar(+Elem, -N, -Lista)
+% ->  nunca termina por el segundo argumento.
+% Vemos que pasa cuando ....
+%
+% replicar(+Elem, +N, -Lista) funciona bien:
+%   ?- replicar(a, 3, L).
+%   L = [a, a, a].
+%
+% Tambien  replicar(+Elem, -N, +Lista):
+%   ?- replicar(a, N, [a, a, a]).
+%   N = 3.
+%
+% Pero replicar(+Elem, -N, -Lista) no funciona:
+%   ?- replicar(a, N, L).
+%   entra en backtracking infinito.
+%
+% Esto es porque la recursión no está acotada ya que intenta generar
+% listas de cualquier longitud sin límite, por lo tanto no termina nunca.
+ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                              %
 %    Ejemplos de nonogramas    %
