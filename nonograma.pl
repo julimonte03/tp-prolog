@@ -119,9 +119,8 @@ combinarCelda(A, B, _) :- nonvar(A), nonvar(B), A \== B.
 
 % Ejercicio 7
 % deducir1Pasada(+NN)
-deducir1Pasada(nono(Filas,Columnas)) :-
-maplist(pintarObligatorias, Filas),
-maplist(pintarObligatorias, Columnas).
+deducir1Pasada(nono(_M, Res)) :-
+maplist(pintarObligatorias, Res).
 
 % Predicado dado
 cantidadVariablesLibres(T, N) :- term_variables(T, LV), length(LV, N).
@@ -170,10 +169,11 @@ resolverDeduciendo(NN):-
 
 
 % Ejercicio 10
-solucionUnica(nono(M, Res)) :- 
+solucionUnica(nono(_M, _Res)) :- 
     findall(M, resolverNaive(nono(M,Res)), Soluciones),
-    length(Soluciones, N),
     N =:= 1.
+    length(Soluciones, N).
+   
 
 % Ejercicio 11 – 
  
