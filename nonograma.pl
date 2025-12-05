@@ -1,32 +1,20 @@
 % Ejercicio 1
-% matriz(+F, +C,-M)
-
-matriz(0, _, []). 
- % generamos una fila de C elementos y despues el resto de la matriz
-matriz(F, C, [N|XS]) :- columna(C,N), matriz(G,C,XS), F is G+1.
-
-% columna(+C,-M) auxiliar
-columna(0,[]).
-columna(C,[_|XS]):- columna(N, XS), C is N+1.
+matriz(F, C, M):- length(M, F), maplist(columna(C), M).
+columna(C, XS):- length(XS, C).
  
 % Ejercicio 2
-%replicar(+Elem, +N, -Lista)
+replicar(Elem, N, Lista):- length(Lista, N), maplist(igual(Elem), Lista).
+igual(Elem, X):- X = Elem.  
 
-% replicar(a,3,L) -> L = [a,a,a]
-replicar(_, 0, []).
-replicar(X, N, [X|XS]) :- replicar(X, M, XS), N is M+1. 
  
 % Ejercicio 3
-% transponer(+M, -MT)
-transponer([], []). 
-transponer([[]|_], []) :- !. % si ya no hay más columnas
-% saca las cabezas de cada fila y sigue con las colas
-transponer(M, [C|MT]) :- cabezasYColas(M,C,Resto), transponer(Resto, MT). 
- 
-% cabezasYColas(+Fila,-Primeros,-Colas)
-cabezasYColas([],[],[]).
-cabezasYColas([[X|XS]|YS], [X|ZS], [XS|TS]):-
-	cabezasYColas(YS, ZS, TS).
+transponer([[]|_], []).
+transponer(M, [Columna | Resto]):- 
+    maplist(filasAColumna, M, Columna, MResto),
+    transponer(MResto, Resto).
+
+filasAColumna([H|T], H, T). 
+
 
 % Predicado dado armarNono/3
 armarNono(RF, RC, nono(M, RS)) :-
@@ -34,9 +22,10 @@ armarNono(RF, RC, nono(M, RS)) :-
 	length(RC, C),
 	matriz(F, C, M),
 	transponer(M, Mt),
-	zipR(RF, M, RSFilas),
-	zipR(RC, Mt, RSColumnas),
-	append(RSFilas, RSColumnas, RS).
+
+zipR(RF, M, RSFilas),
+zipR(RC, Mt, RSColumnas),
+append(RSFilas, RSColumnas, RS).
 
 zipR([], [], []).
 zipR([R|RT], [L|LT], [r(R,L)|T]) :- zipR(RT, LT, T).
@@ -70,23 +59,18 @@ poner_sep(K, LIn, LOut) :-
     colocarOs(1, LIn, LOut).
 
 
-% colocarOs(+N, +L, -R)
-% pone N 'o's al principio de la lista
-colocarOs(0, L, L).
-colocarOs(N, [C|Cs], R) :-
-    N > 0,
-    C = o,
-    N1 is N - 1,
-    colocarOs(N1, Cs, R).
-% colocarXs(+N, +L, -R)
-% pone N 'x' al principio (el bloque pintado)
-colocarXs(0, L, L).
-colocarXs(N, [C|Cs], R) :-
-    N > 0,
-    C = x,
-    N1 is N - 1,
-    colocarXs(N1, Cs, R).
 
+% colocarOs(N, Celdas, Resto)
+% Pone N 'o' y deja Resto después
+colocarOs(N, Celdas, Resto) :-
+    replicar(o, N, Os),
+    append(Os, Resto, Celdas).
+
+% colocarXs(N, Celdas, Resto)
+% Pone N 'x' y deja Resto después
+colocarXs(N, Celdas, Resto) :-
+    replicar(x, N, Xs),
+    append(Xs, Resto, Celdas).
 
 % Ejercicio 5
 % resolverNaive(+NN) 
@@ -95,10 +79,15 @@ resolverNaive(nono(_M,Res)) :-
 
 % Ejercicio 6
 % pintarObligatorias(+R)
-pintarObligatorias(r(Res, Celdas)):-
-    length(Celdas, N),
-    findall(L, (length(L, N) , pintadasValidas(r(Res, L))), Soluciones),
+pintarObligatorias(r(Res, Celdas)) :-
+    findall(Celdas,
+        (
+            pintadasValidas(r(Res, Celdas))
+        ), 
+        Soluciones),
     combinarSoluciones(Soluciones, Celdas).
+
+
 % si una celda es igual en todas, se mantiene si no, queda libre
 combinarSoluciones([Ult], Ult).
 combinarSoluciones([S1, S2| Resto], Resultado):-
@@ -134,22 +123,20 @@ deducirVariasPasadas(NN) :-
 	deducirVariasPasadasCont(NN, VI, VF).
 
 % Predicado dado
-deducirVariasPasadasCont(_, A, A). % Si VI = VF entonces no hubo más cambios y frenamos.
+deducirVariasPasadasCont(_, A, A). % Si VI = VF entonces no hubo mas cambios y frenamos.
 deducirVariasPasadasCont(NN, A, B) :- A =\= B, deducirVariasPasadas(NN).
 
 % Ejercicio 8
  %nono(Matriz, Restricciones)
 
 restriccionConMenosLibres(NN, R) :-
-	NN = nono(_, Res), %r(Bloques, Celdas)
-    member(R, Res), % agarramos una restricción candidata R
-    R = r(_, L),        % agarro su lista de celdas L
-    cantidadVariablesLibres(L, N),
+    NN = nono(_, Res),
+    member(R, Res),
+    cantidadVariablesLibres(R, N),
     N > 0,
-	%ya teneemos las vars libres de R, y ahora 
-	%vemos que no existe OTRA restriccion en Res tal tenga menos celdas sin decidir
+	% ya teneemos las vars libres de R, y ahora 
+	% vemos que no existe OTRA restriccion en Res tal tenga menos celdas sin decidir
     not(( member(OTRA, Res),
-          OTRA \== R,
           OTRA = r(_, L2),
           cantidadVariablesLibres(L2, N2),
           N2 > 0,
@@ -158,21 +145,21 @@ restriccionConMenosLibres(NN, R) :-
 % Ejercicio 9
 resolverDeduciendo(NN) :-
     deducirVariasPasadas(NN), 
-    cantidadVariablesLibres(NN, 0),
-    !.
+    cantidadVariablesLibres(NN, 0).
+
 
 resolverDeduciendo(NN):-
     deducirVariasPasadas(NN),
     restriccionConMenosLibres(NN, R),
     pintadasValidas(R),
+    !,
     resolverDeduciendo(NN).
 
 
 % Ejercicio 10
-solucionUnica(nono(_M, _Res)) :- 
+solucionUnica(nono(M, Res)) :- 
     findall(M, resolverNaive(nono(M,Res)), Soluciones),
-    N =:= 1.
-    length(Soluciones, N).
+    length(Soluciones, 1).
    
 
 % Ejercicio 11 – 
